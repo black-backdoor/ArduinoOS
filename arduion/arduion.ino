@@ -596,9 +596,6 @@ void printNumber(int value, int col) {
 
 //----------- Actions -----------
 void executeAction_ok() {
-  Serial.print(F("ok menu: "));
-  Serial.println(menu);
-  
   switch (menu) {
     case 4:
       menu = 5011;
@@ -634,16 +631,10 @@ void executeAction_back() {
       menu = 5016;
       break;
   }
-  Serial.print(F("back menu: "));
-  Serial.println(menu);
-
   updateMenu();
 }
 
 //Menu
-
-//constant ui
-
 void updateMenu_constant_ui() {
   if (lcd_rows == 3) {
     lcd.createChar(0, character_arow_right);
@@ -970,7 +961,7 @@ void updateMenu_roll_ui() {
         lcd.setCursor(1, 0);
         lcd.print(F("MenuItem1"));
         lcd.setCursor(0, 1);
-        lcd.write(byte(4));
+        lcd.write(byte(0));
         lcd.print(F("MenuItem2"));
         break;
       case 3:
@@ -990,7 +981,7 @@ void updateMenu_roll_ui() {
       case 5:
         menu = 4;
         break;
-
+        
       //Level 1 (5010 - 5013)
       case 5010:
         menu = 5011;
@@ -1001,42 +992,30 @@ void updateMenu_roll_ui() {
         lcd.write(byte(0));
         lcd.setCursor(1, 0);
         lcd.print(F("Device Serial"));
-
-        if ((lcd_colums - 17) > 0) {
-          //if display is enough wide
-
-          //if !serial X shown
-          //if serial -E (plug) shown
-
-          //if serial & !device_serial_connection -E X shown
-          //if serial & device_serial_connection -E and check (plug) shown
-          lcd.setCursor(14, 0);
-          if (!Serial) {
-            lcd.createChar(2, character_cross);
-            lcd.write(byte(2));
-            free(byte(2));
+        if (Serial){
+          lcd.createChar(2, character_plug);
+          lcd.setCursor(15, 0);
+          lcd.write(byte(2));
+          if(device_serial_connection){
+            lcd.createChar(3, character_check);
+            lcd.setCursor(16, 0);
+            lcd.write(byte(3));
           }
-          else if (Serial) {
-            free(byte(1));
-            lcd.createChar(1, character_plug);
-            lcd.write(byte(1));
-            lcd.setCursor(15, 0);
-            if (!device_serial_connection) {
-              lcd.createChar(2, character_cross);
-              lcd.write(byte(2));
-              free(byte(2));
-            }
-            else if (device_serial_connection) {
-              lcd.createChar(2, character_check);
-              lcd.write(byte(2));
-              free(byte(2));
-            }
+          else{
+            lcd.createChar(3, character_cross);
+            lcd.setCursor(16, 0);
+            lcd.write(byte(3));
           }
         }
-
+        else{
+          lcd.createChar(2, character_cross);
+          lcd.setCursor(15, 0);
+          lcd.write(byte(2));
+        }
         lcd.setCursor(1, 1);
         lcd.print(F("User Serial"));
-
+        break;
+        
       case 5012:
         lcd.setCursor(1, 0);
         lcd.print(F("Device Serial"));
@@ -1044,20 +1023,18 @@ void updateMenu_roll_ui() {
         lcd.write(byte(0));
         lcd.setCursor(1, 1);
         lcd.print(F("User Serial"));
-        if ((lcd_colums - 13) > 0) {
-          //if display is enough wide
-          lcd.setCursor(12, 0);
-          if (!user_serial_connection) {
-            lcd.createChar(2, character_cross);
-            lcd.write(byte(2));
-            free(byte(2));
-          }
-          else {
-            lcd.createChar(2, character_check);
-            lcd.write(byte(2));
-            free(byte(2));
-          }
+        if(user_serial_connection){
+          lcd.createChar(2, character_plug);
+          lcd.setCursor(13, 1);
+          lcd.write(byte(2));
         }
+        else{
+          lcd.createChar(2, character_cross);
+          lcd.setCursor(13, 1);
+          lcd.write(byte(2));
+        }
+        break;
+
       case 5013:
         menu = 5012;
         break;
@@ -1068,36 +1045,27 @@ void updateMenu_roll_ui() {
         break;
 
       case 5015:
-        lcd.createChar(2, character_cross);
         lcd.setCursor(0, 0);
-        lcd.write(byte(2));
-        lcd.setCursor(1, 0);
         lcd.print(F("Device Serial"));
         lcd.setCursor(0, 1);
-        if (!Serial) {
+        if(Serial){
+          if(device_serial_connection){
+            lcd.print(F("plugin activ"));
+          }
+          else{
+            lcd.print(F("plugin disabeld"));
+          }
+        }
+        else{
           lcd.print(F("unpluged"));
         }
-        else if (Serial && !device_serial_connection) {
-          lcd.print(F("plugin disabeld"));
-        }
-        else if (Serial && device_serial_connection) {
-          lcd.print(F("plugin activ"));
-        }
-        free(byte(2));
         break;
 
       case 5016:
-        lcd.createChar(2, character_plug);
         lcd.setCursor(0, 0);
-        lcd.write(byte(2));
-        lcd.setCursor(1, 0);
         lcd.print(F("Device Serial"));
-
         lcd.setCursor(0, 1);
-        lcd.write(byte(0));
-        lcd.setCursor(1, 1);
         lcd.print(F("More Info"));
-        free(byte(2));
         break;
 
       case 5017:
@@ -1109,19 +1077,15 @@ void updateMenu_roll_ui() {
         break;
 
       case 5019:
-        lcd.createChar(2, character_cross);
         lcd.setCursor(0, 0);
-        lcd.write(byte(2));
-        lcd.setCursor(1, 0);
         lcd.print(F("User Serial"));
-        lcd.setCursor(1, 1);
+        lcd.setCursor(0, 1);
         if (!user_serial_connection) {
           lcd.print(F("disabled"));
         }
         else {
           lcd.print(F("enabled"));
         }
-        free(byte(2));
         break;
 
       case 5020:
@@ -1133,7 +1097,9 @@ void updateMenu_roll_ui() {
       case 5021:
         menu = 5022;
         break;
+
       case 5022:
+        lcd.createChar(2, character_plug);
         lcd.setCursor(0, 0);
         lcd.write(byte(2));
         lcd.setCursor(1, 0);
@@ -1148,6 +1114,7 @@ void updateMenu_roll_ui() {
         break;
 
       case 5023:
+        lcd.createChar(2, character_plug);
         lcd.setCursor(0, 0);
         lcd.write(byte(2));
         lcd.setCursor(1, 0);
@@ -1333,66 +1300,47 @@ void updateMenu_roll_ui() {
         lcd.write(byte(0));
         lcd.setCursor(1, 0);
         lcd.print(F("Device Serial"));
-        if ((lcd_colums - 15) > 0) {
-          lcd.createChar(1, character_plug);
-          lcd.createChar(3, character_cross);
-          lcd.createChar(4, character_check);
-
-          //if display is enough wide
-
-          //if !serial X shown
-          //if serial -E (plug) shown
-
-          //if serial & !device_serial_connection -E X shown
-          //if serial & device_serial_connection -E and check (plug) shown
-          lcd.setCursor(14, 0);
-          if (!Serial) {
+        if (Serial){
+          lcd.createChar(2, character_plug);
+          lcd.setCursor(15, 0);
+          lcd.write(byte(2));
+          if(device_serial_connection){
+            lcd.createChar(3, character_check);
+            lcd.setCursor(16, 0);
             lcd.write(byte(3));
           }
-          else if (Serial) {
-            lcd.write(byte(1));
-            lcd.setCursor(15, 0);
-            if (!device_serial_connection) {
-              lcd.write(byte(3));
-            }
-            else if (device_serial_connection) {
-              lcd.write(byte(4));
-            }
+          else{
+            lcd.createChar(3, character_cross);
+            lcd.setCursor(16, 0);
+            lcd.write(byte(3));
           }
-          free(byte(1));
-          free(byte(3));
-          free(byte(4));
+        }
+        else{
+          lcd.createChar(2, character_cross);
+          lcd.setCursor(15, 0);
+          lcd.write(byte(2));
         }
         lcd.setCursor(1, 1);
         lcd.print(F("User Serial"));
         break;
         
       case 5012:
-        Serial.println("_Start");
-        lcd.createChar(2, character_cross);
-        lcd.createChar(3, character_check);
-
         lcd.setCursor(1, 0);
         lcd.print(F("Device Serial"));
-
         lcd.setCursor(0, 1);
         lcd.write(byte(0));
         lcd.setCursor(1, 1);
         lcd.print(F("User Serial"));
-
-        if ((lcd_colums - 13) > 0) {
-          //if display is enough wide
-          lcd.setCursor(12, 0);
-          if (!user_serial_connection) {
-            lcd.write(byte(2));
-          }
-          else {
-            lcd.write(byte(3));
-          }
-          free(byte(2));
-          free(byte(3));
+        if(user_serial_connection){
+          lcd.createChar(2, character_plug);
+          lcd.setCursor(13, 1);
+          lcd.write(byte(2));
         }
-        Serial.println("_end");
+        else{
+          lcd.createChar(2, character_cross);
+          lcd.setCursor(13, 1);
+          lcd.write(byte(2));
+        }
         break;
 
       case 5013:
@@ -1405,38 +1353,27 @@ void updateMenu_roll_ui() {
         break;
 
       case 5015:
-        lcd.createChar(2, character_cross);
         lcd.setCursor(0, 0);
-        lcd.write(byte(2));
-        lcd.setCursor(1, 0);
         lcd.print(F("Device Serial"));
-        lcd.setCursor(0, 1);
-        lcd.write(byte(0));
-        lcd.setCursor(3, 0);
-        if (!Serial) {
+        lcd.setCursor(0, 3);
+        if(Serial){
+          if(device_serial_connection){
+            lcd.print(F("plugin activ"));
+          }
+          else{
+            lcd.print(F("plugin disabeld"));
+          }
+        }
+        else{
           lcd.print(F("unpluged"));
         }
-        else if (Serial && !device_serial_connection) {
-          lcd.print(F("plugin disabeld"));
-        }
-        else if (Serial && device_serial_connection) {
-          lcd.print(F("plugin activ"));
-        }
-        free(byte(2));
         break;
 
       case 5016:
-        lcd.createChar(2, character_plug);
         lcd.setCursor(0, 0);
-        lcd.write(byte(2));
-        lcd.setCursor(1, 0);
         lcd.print(F("Device Serial"));
-
-        lcd.setCursor(0, 1);
-        lcd.write(byte(0));
-        lcd.setCursor(3, 0);
+        lcd.setCursor(0, 3);
         lcd.print(F("More Info"));
-        free(byte(2));
         break;
 
       case 5017:
@@ -1448,21 +1385,15 @@ void updateMenu_roll_ui() {
         break;
 
       case 5019:
-        lcd.createChar(2, character_cross);
         lcd.setCursor(0, 0);
-        lcd.write(byte(2));
-        lcd.setCursor(1, 0);
         lcd.print(F("User Serial"));
-        lcd.setCursor(0, 1);
-        lcd.write(byte(0));
-        lcd.setCursor(3, 0);
+        lcd.setCursor(0, 3);
         if (!user_serial_connection) {
           lcd.print(F("disabled"));
         }
         else {
           lcd.print(F("enabled"));
         }
-        free(byte(2));
         break;
 
       case 5020:
@@ -1481,10 +1412,9 @@ void updateMenu_roll_ui() {
         lcd.write(byte(2));
         lcd.setCursor(1, 0);
         lcd.print(F("Device Serial"));
-
-        lcd.setCursor(0, 3);
+        lcd.setCursor(0, 2);
         lcd.write(byte(2));
-        lcd.setCursor(1, 3);
+        lcd.setCursor(1, 2);
         lcd.print(F("Cable Status"));
         lcd.setCursor(0, 3);
         if (!Serial) {
@@ -1501,12 +1431,11 @@ void updateMenu_roll_ui() {
         lcd.write(byte(2));
         lcd.setCursor(1, 0);
         lcd.print(F("Device Serial"));
-
-        lcd.setCursor(0, 3);
+        lcd.setCursor(0, 2);
         lcd.write(byte(2));
-        lcd.setCursor(1, 3);
+        lcd.setCursor(1, 2);
         lcd.print(F("Plugin Status"));
-        lcd.setCursor(0, 4);
+        lcd.setCursor(0, 3);
         if (device_serial_connection) {
           lcd.print(F("enabled"));
         }
@@ -1744,22 +1673,31 @@ void updateMenu() {
                       -> Sound
 
     //10000
-    Task Manager -> WORK (10001)
-    Task Manager -> FPS (10002)
-    Task Manager -> Graphics (10003)
-    Task Manager -> Gaming (10004)
-    Task Manager -> Advanced Gaming (10005)
-    Task Manager -> RAM (10006)
-    Task Manager -> CPU (10007)
-    Task Manager -> GPU (10008)
-    Task Manager -> Temperatures (10009)
-    Task Manager -> Processors (10010)
+    Task Manager -> Profiles
+    Task Manager -> Profiles -> WORK (10001)
+    Task Manager -> Profiles -> FPS (10002)
+    Task Manager -> Profiles -> Graphics (10003)
+    Task Manager -> Profiles -> Gaming (10004)
+    Task Manager -> Profiles -> Advanced Gaming (10005)
+    Task Manager -> Profiles -> RAM (10006)
+    Task Manager -> Profiles -> CPU (10007)
+    Task Manager -> Profiles -> GPU (10008)
+    Task Manager -> Profiles -> Temperatures (10009)
+    Task Manager -> Profiles -> Processors (10010)
+    
+    Task Manager -> Settings
+    Task Manager -> Settings -> sync rate
 
     Stop Wotch
 
     Temperature
     CO2
     Date & Time
+    
+    PC Info
+    
+    PC Info -> HWID
+    PC Info -> CPU
   */
   /*
 
@@ -1964,258 +1902,6 @@ void updateMenu() {
 }
 
 //------------------------------------------------
-
-void temp() {
-  if (lcd_rows >= 2) {
-    /*
-      Task Manager -> WORK
-      ---------------
-      CPU%
-      RAM%
-      ----------------
-    */
-
-    lcd.setCursor(0, 0);
-    lcd.print(F("CPU: "));
-    lcd.print(F("100")); //CPU PERCENT
-    lcd.print(F("%"));
-    //------------------
-    lcd.setCursor(0, 1);
-    lcd.print(F("GPU: "));
-    lcd.print(F("100")); //GPU PERCENT
-    lcd.print(F("%"));
-  }
-
-  if (lcd_rows >= 1) {
-    /*
-      Task Manager -> FPS
-      -----------------
-      FPS
-
-      -----------------
-    */
-    lcd.setCursor(0, 0);
-    lcd.print(F("100")); //FPS
-    lcd.print(F(" "));
-    lcd.print(F("FPS"));
-  }
-
-  if (lcd_rows >= 4) {
-    lcd.createChar(2, character_celsius);
-    /*
-      Task Manager -> Graphics
-      -----------------
-      FPS
-
-      GPU%
-      GPU Temp
-      -----------------
-    */
-    lcd.setCursor(0, 0);
-    lcd.print(F("100")); //FPS
-    lcd.print(F(" "));
-    lcd.print(F("FPS"));
-    //------------------
-    lcd.setCursor(0, 2);
-    lcd.print(F("GPU: "));
-    lcd.print(F("100")); //GPU PERCENT
-    lcd.print(F("%"));
-    lcd.setCursor(0, 3);
-    lcd.print(F("GPU: "));
-    lcd.print(F("100")); //GPU Temp.
-    lcd.write(byte(2));
-    lcd.print(F("C"));
-    free(byte(2));
-  }
-
-  if (lcd_rows >= 4) {
-    /*
-      Task Manager -> Gaming
-      -----------------
-      FPS
-      GPU%
-      CPU%
-      RAM%
-      -----------------
-    */
-    lcd.setCursor(0, 0);
-    lcd.print(F("100")); //FPS
-    lcd.print(F(" "));
-    lcd.print(F("FPS"));
-    //------------------
-    lcd.setCursor(0, 1);
-    lcd.print(F("GPU: "));
-    lcd.print(F("100")); //GPU PERCENT
-    lcd.print(F("%"));
-    //------------------
-    lcd.setCursor(0, 1);
-    lcd.print(F("CPU: "));
-    lcd.print(F("100")); //CPU PERCENT
-    lcd.print(F("%"));
-    //------------------
-    lcd.setCursor(0, 1);
-    lcd.print(F("RAM: "));
-    lcd.print(F("100")); //RAM PERCENT
-    lcd.print(F("%"));
-  }
-
-  if (lcd_rows >= 4) {
-    lcd.createChar(2, character_celsius);
-    /*
-      Task Manager -> Advanced Gaming
-      -----------------
-      FPS
-      GPU%    GPU Temp.
-      CPU%    CPU Temp.
-      RAM%
-      -----------------
-    */
-    lcd.setCursor(0, 0);
-    lcd.print(F("100")); //FPS
-    lcd.print(F(" "));
-    lcd.print(F("FPS"));
-    //------------------
-    lcd.setCursor(0, 1);
-    lcd.print(F("GPU: "));
-    lcd.print(F("100")); //GPU PERCENT
-    lcd.print(F("%"));
-    //------------------
-    lcd.setCursor(0, 1);
-    lcd.print(F("CPU: "));
-    lcd.print(F("100")); //CPU PERCENT
-    lcd.print(F("%"));
-    //------------------
-    lcd.setCursor(0, 1);
-    lcd.print(F("RAM: "));
-    lcd.print(F("100")); //RAM PERCENT
-    lcd.print(F("%"));
-    //------------------
-    lcd.setCursor(10, 1);
-    lcd.print(F("100")); //GPU Temp.
-    lcd.write(byte(2));
-    lcd.print(F("C"));
-    //------------------
-    lcd.setCursor(10, 2);
-    lcd.print(F("100")); //CPU Temp.
-    lcd.write(byte(2));
-    lcd.print(F("C"));
-    free(byte(2));
-  }
-
-  if (lcd_rows >= 2) {
-    /*
-      Task Manager -> RAM
-      ---------------
-      RAM%
-      RAM USED/RAM ALL
-      ---------------
-    */
-
-    lcd.setCursor(0, 0);
-    lcd.print(F("RAM: "));
-    lcd.print(F("100")); //RAM PERCENT
-    lcd.print(F("%"));
-    //------------------
-    if (lcd_rows >= 3) {
-      lcd.setCursor(0, 2);
-    }
-    else if (lcd_rows == 2) {
-      lcd.setCursor(0, 1);
-    }
-    lcd.print(F("7.810GB")); //RAM USED
-    lcd.print(F("/"));
-    lcd.print(F("7.899GB")); //RAM ALL
-  }
-
-  if (lcd_rows >= 2) {
-    lcd.createChar(2, character_celsius);
-    /*
-      Task Manager -> CPU
-      ---------------
-      CPU%
-      CPU Temp
-      ---------------
-    */
-    lcd.setCursor(0, 0);
-    lcd.print(F("CPU: "));
-    lcd.print(F("100")); //CPU PERCENT
-    lcd.print(F("%"));
-    //------------------
-    lcd.setCursor(0, 1);
-    lcd.print(F("CPU: "));
-    lcd.print(F("100")); //CPU Temp.
-    lcd.write(byte(2));
-    lcd.print(F("C"));
-    free(byte(2));
-  }
-
-  if (lcd_rows >= 2) {
-    lcd.createChar(2, character_celsius);
-    /*
-      Task Manager -> GPU
-      ---------------
-      GPU%
-      GPU Temp
-      ---------------
-    */
-    lcd.setCursor(0, 0);
-    lcd.print(F("GPU: "));
-    lcd.print(F("100")); //GPU PERCENT
-    lcd.print(F("%"));
-    //------------------
-    lcd.setCursor(0, 1);
-    lcd.print(F("GPU: "));
-    lcd.print(F("100")); //GPU Temp.
-    lcd.write(byte(2));
-    lcd.print(F("C"));
-    free(byte(2));
-  }
-
-  if (lcd_rows >= 2) {
-    lcd.createChar(2, character_celsius);
-    /*
-      Task Manager -> CPU Temp / GPU Temp
-      ---------------
-      CPU Temp
-      GPU Temp
-      ---------------
-    */
-    lcd.print(F("CPU: "));
-    lcd.print(F("100")); //CPU Temp.
-    lcd.write(byte(2));
-    lcd.print(F("C"));
-    //------------------
-    lcd.print(F("GPU: "));
-    lcd.print(F("100")); //GPU Temp.
-    lcd.write(byte(2));
-    lcd.print(F("C"));
-    free(byte(2));
-  }
-
-  if (lcd_rows >= 2) {
-    /*
-      Task Manager -> CPU% / GPU%
-      ----------------
-      CPU%
-      GPU%
-      ----------------
-    */
-
-    lcd.setCursor(0, 0);
-    lcd.print(F("CPU: "));
-    lcd.print(F("100")); //CPU PERCENT
-    lcd.print(F("%"));
-    //------------------
-    lcd.setCursor(0, 1);
-    lcd.print(F("GPU: "));
-    lcd.print(F("100")); //GPU PERCENT
-    lcd.print(F("%"));
-  }
-
-
-
-}
-
 void device_serial_command_process(String input) {
   //remove ! from command
   //!display -> display
@@ -2567,6 +2253,284 @@ void process_commands(String input) {
   Serial.println("command end");
 }
 
+//################ TASK MANAGER ################
+enum data_types {
+  cpu_percent,
+  cpu_temp,
+  gpu_percent,
+  gpu_temp,
+  ram_all,
+  ram_free,
+  ram_used,
+  ram_percent,
+  fps,
+  false
+};
+
+void task_manager_get_data(data_types data_value);
+data_value =
+
+void task_manager_get_data(data_types data_value){
+  if(data_value == false){
+    return "";
+  }
+  else if (data_value = cpu_percent){
+    //request data from pc
+    return "data"
+  }
+  else if (data_value = ram_all){
+    Serial.println("!ram_all")
+    while(!Serial.available()){}
+    return Serial.readString().trim()
+  }
+}
+
+void temp() {
+  if (lcd_rows >= 2) {
+    /*
+      Task Manager -> WORK
+      ---------------
+      CPU%
+      RAM%
+      ----------------
+    */
+
+    lcd.setCursor(0, 0);
+    lcd.print(F("CPU: "));
+    lcd.print(task_manager_get_data(cpu_percent)); //CPU PERCENT
+    lcd.print(F("%"));
+    //------------------
+    lcd.setCursor(0, 1);
+    lcd.print(F("RAM: "));
+    lcd.print(task_manager_get_data(ram_percent))); //RAM PERCENT
+    lcd.print(F("%"));
+  }
+
+  if (lcd_rows >= 1) {
+    /*
+      Task Manager -> FPS
+      -----------------
+      FPS
+
+      -----------------
+    */
+    lcd.setCursor(0, 0);
+    lcd.print(task_manager_get_data(fps)); //FPS
+    lcd.print(F(" FPS"));
+  }
+
+  if (lcd_rows >= 4) {
+    lcd.createChar(2, character_celsius);
+    /*
+      Task Manager -> Graphics
+      -----------------
+      FPS
+
+      GPU%
+      GPU Temp
+      -----------------
+    */
+    lcd.setCursor(0, 0);
+    lcd.print(task_manager_get_data(fps)); //FPS
+    lcd.print(F(" FPS"));
+    //------------------
+    lcd.setCursor(0, 2);
+    lcd.print(F("GPU: "));
+    lcd.print(task_manager_get_data(gpu_percent)); //GPU PERCENT
+    lcd.print(F("%"));
+    lcd.setCursor(0, 3);
+    lcd.print(F("GPU: "));
+    lcd.print(task_manager_get_data(gpu_temp)); //GPU Temp.
+    lcd.write(byte(2));
+    lcd.print(F("C"));
+    free(byte(2));
+  }
+
+  if (lcd_rows >= 4) {
+    /*
+      Task Manager -> Gaming
+      -----------------
+      FPS
+      GPU%
+      CPU%
+      RAM%
+      -----------------
+    */
+    lcd.setCursor(0, 0);
+    lcd.print(task_manager_get_data(fps)); //FPS
+    lcd.print(F(" FPS"));
+    //------------------
+    lcd.setCursor(0, 1);
+    lcd.print(F("GPU: "));
+    lcd.print(task_manager_get_data(gpu_percent)); //GPU PERCENT
+    lcd.print(F("%"));
+    //------------------
+    lcd.setCursor(0, 1);
+    lcd.print(F("CPU: "));
+    lcd.print(task_manager_get_data(cpu_percent)); //CPU PERCENT
+    lcd.print(F("%"));
+    //------------------
+    lcd.setCursor(0, 1);
+    lcd.print(F("RAM: "));
+    lcd.print(task_manager_get_data(ram_percent)); //RAM PERCENT
+    lcd.print(F("%"));
+  }
+
+  if (lcd_rows >= 4) {
+    lcd.createChar(2, character_celsius);
+    /*
+      Task Manager -> Advanced Gaming
+      -----------------
+      FPS
+      GPU%    GPU Temp.
+      CPU%    CPU Temp.
+      RAM%
+      -----------------
+    */
+    lcd.setCursor(0, 0);
+    lcd.print(task_manager_get_data(fps)); //FPS
+    lcd.print(F(" FPS"));
+    //------------------
+    lcd.setCursor(0, 1);
+    lcd.print(F("GPU: "));
+    lcd.print(task_manager_get_data(gpu_percent)); //GPU PERCENT
+    lcd.print(F("%"));
+    //------------------
+    lcd.setCursor(0, 1);
+    lcd.print(F("CPU: "));
+    lcd.print(task_manager_get_data(cpu_percent)); //CPU PERCENT
+    lcd.print(F("%"));
+    //------------------
+    lcd.setCursor(0, 1);
+    lcd.print(F("RAM: "));
+    lcd.print(task_manager_get_data(ram_percent)); //RAM PERCENT
+    lcd.print(F("%"));
+    //------------------
+    lcd.setCursor(10, 1);
+    lcd.print(task_manager_get_data(gpu_temp)); //GPU Temp.
+    lcd.write(byte(2));
+    lcd.print(F("C"));
+    //------------------
+    lcd.setCursor(10, 2);
+    lcd.print(task_manager_get_data(cpu_Temp)); //CPU Temp.
+    lcd.write(byte(2));
+    lcd.print(F("C"));
+    free(byte(2));
+  }
+
+  if (lcd_rows >= 2) {
+    /*
+      Task Manager -> RAM
+      ---------------
+      RAM%
+      RAM USED/RAM ALL
+      ---------------
+    */
+
+    lcd.setCursor(0, 0);
+    lcd.print(F("RAM: "));
+    lcd.print(ram_percent); //RAM PERCENT
+    lcd.print(F("%"));
+    //------------------
+    if (lcd_rows >= 3) {
+      lcd.setCursor(0, 2);
+    }
+    else if (lcd_rows == 2) {
+      lcd.setCursor(0, 1);
+    }
+    lcd.print(task_manager_get_data(ram_used)); //RAM USED
+    lcd.print(F("/"));
+    lcd.print(task_manager_get_data(ram_all)); //RAM ALL
+  }
+
+  if (lcd_rows >= 2) {
+    lcd.createChar(2, character_celsius);
+    /*
+      Task Manager -> CPU
+      ---------------
+      CPU%
+      CPU Temp
+      ---------------
+    */
+    lcd.setCursor(0, 0);
+    lcd.print(F("CPU: "));
+    lcd.print(task_manager_get_data(cpu_percent)); //CPU PERCENT
+    lcd.print(F("%"));
+    //------------------
+    lcd.setCursor(0, 1);
+    lcd.print(F("CPU: "));
+    lcd.print(task_manager_get_data(cpu_temp)); //CPU Temp.
+    lcd.write(byte(2));
+    lcd.print(F("C"));
+    free(byte(2));
+  }
+
+  if (lcd_rows >= 2) {
+    lcd.createChar(2, character_celsius);
+    /*
+      Task Manager -> GPU
+      ---------------
+      GPU%
+      GPU Temp
+      ---------------
+    */
+    lcd.setCursor(0, 0);
+    lcd.print(F("GPU: "));
+    lcd.print(task_manager_get_data(gpu_percent)); //GPU PERCENT
+    lcd.print(F("%"));
+    //------------------
+    lcd.setCursor(0, 1);
+    lcd.print(F("GPU: "));
+    lcd.print(task_manager_get_data(gpu_temp)); //GPU Temp.
+    lcd.write(byte(2));
+    lcd.print(F("C"));
+    free(byte(2));
+  }
+
+  if (lcd_rows >= 2) {
+    lcd.createChar(2, character_celsius);
+    /*
+      Task Manager -> CPU Temp / GPU Temp
+      ---------------
+      CPU Temp
+      GPU Temp
+      ---------------
+    */
+    lcd.print(F("CPU: "));
+    lcd.print(task_manager_get_data(cpu_temp)); //CPU Temp.
+    lcd.write(byte(2));
+    lcd.print(F("C"));
+    //------------------
+    lcd.print(F("GPU: "));
+    lcd.print(task_manager_get_data(gpu_temp)); //GPU Temp.
+    lcd.write(byte(2));
+    lcd.print(F("C"));
+    free(byte(2));
+  }
+
+  if (lcd_rows >= 2) {
+    /*
+      Task Manager -> CPU% / GPU%
+      ----------------
+      CPU%
+      GPU%
+      ----------------
+    */
+
+    lcd.setCursor(0, 0);
+    lcd.print(F("CPU: "));
+    lcd.print(Ftask_manager_get_data(cpu_percent)); //CPU PERCENT
+    lcd.print(F("%"));
+    //------------------
+    lcd.setCursor(0, 1);
+    lcd.print(F("GPU: "));
+    lcd.print(task_manager_get_data(gpu_percent)); //GPU PERCENT
+    lcd.print(F("%"));
+  }
+
+
+
+}
 
 void setup() {
   //--------- Time ---------
@@ -2771,8 +2735,8 @@ void setup() {
 
   lcd.clear();
 
-  //updateMenu();
-  clock_shown = true;
+  updateMenu();
+  clock_shown = false;
 }
 
 void loop() {
@@ -2825,10 +2789,6 @@ void loop() {
         }
       }
     }
-    Serial.println(minutes);
-    Serial.println(seconds);
-    Serial.println(last_minutes);
-    Serial.println("------------");
   }
   if(clock_shown){
     clock_display();
@@ -2836,9 +2796,7 @@ void loop() {
 
   //Serial.println();
   if (user_serial.available()) {
-    String temp = user_serial.readString();
-    Serial.println(temp);
-    process_commands(temp);
+    process_commands(user_serial.readString());
   }
   /*
     if (!Serial) {
